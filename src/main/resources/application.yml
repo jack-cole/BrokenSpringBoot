@@ -1,0 +1,19 @@
+logging:
+    level:
+        org.flywaydb: TRACE
+        org.springframework.boot.actuate.endpoint.mvc: DEBUG
+        root: debug
+
+spring:
+    datasource:
+        driverClassName: org.postgresql.Driver
+        url: "jdbc:postgresql://localhost:5433/myDB"
+        username: postgres
+        password: test123
+    flyway:
+        enabled: true
+        validate-on-migrate: true
+    jooq:
+        sql-dialect: postgres
+
+
