@@ -6,7 +6,10 @@
 
     <groupId>org.example</groupId>
     <artifactId>backend_</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <version>1.0.1-SNAPSHOT</version>
+    <name>eveflow</name>
+    <url>http://maven.apache.org</url>
 
     <repositories>
         <repository>
@@ -47,10 +50,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jooq</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-jdbc</artifactId>-->
-        <!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-jdbc</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
@@ -76,12 +79,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.23</version>
         </dependency>
 
         <dependency>
@@ -154,8 +151,49 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <configuration>
+                    <driver>org.postgresql.Driver</driver>
+                    <url>jdbc:postgresql://localhost:5432/mydb</url>
+                    <user>postgres</user>
+                    <password>brandy123</password>
+                </configuration>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>migrate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                <version>2.3.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/swagger/eve_latest.json</inputSpec>
+                            <language>java</language>
+                            <output>${project.basedir}/generated/eve</output>
+<!--                            <configOptions>-->
+<!--                                <sourceFolder>/</sourceFolder>-->
+<!--                            </configOptions>-->
+                            <modelPackage>com.ccp.eve.model</modelPackage>
+                            <apiPackage>com.ccp.eve.api</apiPackage>
+<!--                            <generateApiTests>false</generateApiTests>-->
+<!--                            <generateApiDocumentation>false</generateApiDocumentation>-->
+<!--                            <generateModelTests>false</generateModelTests>-->
+<!--                            <generateModelDocumentation>false</generateModelDocumentation>-->
+<!--                            <generateSupportingFiles>false</generateSupportingFiles>-->
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jooq</groupId>
@@ -194,12 +232,37 @@
 
                 </dependencies>
                 <configuration>
+                    <jdbc>
+                        <driver>org.postgresql.Driver</driver>
+                        <url>jdbc:postgresql://localhost:5432/mydb</url>
+                        <user>postgres</user>
+                        <password>brandy123</password>
+                    </jdbc>
                     <generator>
                         <database>
                             <name>org.jooq.meta.postgres.PostgresDatabase</name>
                             <includes>.*</includes>
                             <excludes/>
                             <inputSchema>public</inputSchema>
+
+                            <!-- https://www.jooq.org/doc/3.13/manual/code-generation/custom-data-types/ -->
+                            <forcedTypes>
+                                <forcedType>
+                                    <userType>org.threeten.bp.OffsetDateTime</userType>
+                                    <converter>com.funsies.eveflow.db.converter.OffsetDateTimeConverter</converter>
+                                    <types>TIMESTAMP\ WITH\ TIME\ ZONE</types>
+                                </forcedType>
+                                <forcedType>
+                                    <userType>org.threeten.bp.LocalDate</userType>
+                                    <converter>com.funsies.eveflow.db.converter.LocalDateConveter</converter>
+                                    <types>DATE</types>
+                                </forcedType>
+                                <forcedType>
+                                    <userType>com.ccp.eve.model.GetMarketsRegionIdOrders200Ok.RangeEnum</userType>
+                                    <converter>com.funsies.eveflow.db.converter.RangeStringConverter</converter>
+                                    <types>RANGE</types>
+                                </forcedType>
+                            </forcedTypes>
                         </database>
 
                         <target>
